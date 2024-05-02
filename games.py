@@ -441,14 +441,57 @@ class TicTacToe(Game):
         else:
             return 0
 
-    def evaluation_func(self, state):
+    def evaluation_func(self, state, player):
         """computes value for a player on board after move.
             Likely it is better to conside the board's state from 
             the point of view of both 'X' and 'O' players and then subtract
-            the corresponding values before returning."""
-                
-        print("evaluation_function: to be completed by students")
-        pass
+            the corresponding values before returning.""" 
+        # Determine who is the player and who is the opponent
+        if player == 'X':
+            opponent = 'O'
+        else:
+            opponent = 'X'
+        # Compute player score
+        playerScore = 0
+        opponentScore = 0
+        playerScore = self.evaluation_calc(state.board, player)
+        opponentScore = self.evaluation_calc(state.board, opponent)
+        # Compute player points, points are calculated based on how large the score is
+        playerPoints = self.calculate_points(playerScore)
+        opponentPoints = self.calculate_points(opponentScore)
+        return abs(playerPoints - opponentPoints)
+
+    def evaluation_calc(self, board, player):
+        "Helper evaluation calulation method for evaluation_func to count the number of moves for the player"
+        score = 0
+        rows = self.h
+        cols = self.v
+        #Count how many moves are in the board already
+        for row in range(1, rows + 1):          
+            if self.k_in_row(board, (row, 1), player, (1, 0)):
+                score += 1
+        for col in range(1, cols + 1):
+            #Horizontal
+            if self.k_in_row(board, (1, col), player, (0, 1)):
+                score += 1     
+        #Diagonal to the left
+        if self.k_in_row(board, (1,1), player, (1, 1)):
+            score += 1                
+        #Diagonal to the right
+        if self.k_in_row(board, (1, cols), player, (1, -1)):
+            score += 1
+        return score
+    
+    def calculate_points(self, count):
+        "Helper point calculation method for evaluation_func to calculate points for each player"
+        #Return 0 if the player score is 0
+        if (count == 0):
+            return 0
+        #Multiply points by 10 for every score the player has
+        points = 1
+        for i in range(1, count):
+            points *= (i * 10)
+        return points
 		
     def k_in_row(self, board, move, player, delta_x_y):
         """Return true if there is a line through move on board for player.
