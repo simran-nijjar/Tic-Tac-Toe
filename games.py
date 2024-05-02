@@ -142,14 +142,22 @@ def alpha_beta_search(game, state):
         if game.terminal_test(state):
             return game.utility(state, player)
         v = -np.inf
-        print("alpha_beta_search: max_value: to be completed by student")
+        for action in game.actions(state): #Finding action in game state
+            v = max(v, min_value(game.result(state, action), alpha, beta))
+            if (v >= beta):
+                return v
+            alpha = max(alpha, v) #max's best option on path to root
         return v
 
     def min_value(state, alpha, beta):
         if game.terminal_test(state):
             return game.utility(state, player)
         v = np.inf
-        print("alpha_beta_search: min_value: to be completed by student")
+        for action in game.actions(state):  #Finding action in game state
+            v = min(v, max_value(game.result(state, action), alpha, beta))
+            if (v <= alpha):
+                return v
+            beta = min(beta, v) #min's best option on path to root
         return v
 
     # Body of alpha_beta_search:
@@ -167,9 +175,55 @@ def alpha_beta_search(game, state):
 def alpha_beta_cutoff_search(game, state, d=4, cutoff_test=None, eval_fn=None):
     """Search game to determine best action; use alpha-beta pruning.
     This version cuts off search and uses an evaluation function."""
-    print("alpha_beta_cutoff_search: may be used, if so, must be implemented by students")
+    player = game.to_move(state)
+
+    # Functions used by alpha_beta
+    def max_value(state, alpha, beta, depth):
+        if game.terminal_test(state):
+            return game.utility(state, player)
+        if cutoff_test(state, depth):
+            return eval_fn(state)
+        v = -np.inf
+        for action in game.actions(state): #Finding action in game state
+            v = max(v, min_value(game.result(state, action), alpha, beta, depth + 1))
+            if (v >= beta):
+                return v
+            alpha = max(alpha, v) #max's best option on path to root
+        return v
+
+    def min_value(state, alpha, beta, depth):
+        if game.terminal_test(state):
+            return game.utility(state, player)
+        if cutoff_test(state, depth):
+            return eval_fn(state)
+        v = np.inf
+        for action in game.actions(state):  #Finding action in game state
+            v = min(v, max_value(game.result(state, action), alpha, beta, depth + 1))
+            if (v <= alpha):
+                return v
+            beta = min(beta, v) #min's best option on path to root
+        return v
     
-    return None
+    # Return true if the current depth is greater than the given depth or if the game is in a terminal state
+    def calc_cutoff_test(state, depth):
+        return d < depth or game.terminal_test(state)
+    
+    # Returns the evaluation func
+    def calc_eval_fn(state):
+        return game.evaluation_func(state, player)
+
+    # Body of alpha_beta_cutoff_search starts here:
+    best_action = None
+    alpha = -np.inf
+    beta = np.inf
+    cutoff_test = calc_cutoff_test
+    eval_fn = calc_eval_fn
+    for action in game.actions(state):
+        v = min_value(game.result(state, action), alpha, beta, d)
+        if v > alpha:
+            alpha = v
+            best_action = action
+    return best_action
 
 
 # ______________________________________________________________________________
