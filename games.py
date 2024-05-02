@@ -124,8 +124,16 @@ def expect_minmax(game, state):
             return game.utility(res_state, player)
         sum_chances = 0
         num_chances = len(game.chances(res_state))
-        print("chance_node: to be completed by students")
-        return 0 
+        for chance in game.chances(res_state): 
+            chanceCalc = 0
+            if res_state.to_move != player: #If the move is the oppenents
+                chanceCalc = min_value(res_state) #Calculate for minimization
+            else: #If the move is the players
+                chanceCalc = max_value(res_state) #Calculate for maximization
+            sum_chances += chanceCalc * (1 * chance) #Here the probability I have randomly assigned 1 for each node
+        if (num_chances == 0): #If the number of chances is zero return 0
+            return 0
+        return sum_chances / num_chances; #Else return the number of chances
 
     # Body of expect_minmax:
     return max(game.actions(state), key=lambda a: chance_node(state, a), default=None)
