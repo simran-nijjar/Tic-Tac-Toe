@@ -57,12 +57,43 @@ def minmax(game, state):
     return max(game.actions(state), key=lambda a: min_value(game.result(state, a)))
 
 
-def minmax_cutoff(game, state):
+def minmax_cutoff(game, state, d = 4, cutoff_test = None, eval_fn = None):
     """Given a state in a game, calculate the best move by searching
     forward all the way to the cutoff depth. At that level use evaluation func."""
+    player = game.to_move(state)
 
-    print("minmax_cutoff: to be done by studens")
-    return None
+    def max_value(state, depth):
+        if game.terminal_test(state):
+            return game.utility(state, player)
+        if cutoff_test(state, depth):
+            return eval_fn(state)
+        v = -np.inf
+        for a in game.actions(state):
+            v = max(v, min_value(game.result(state, a), depth - 1))
+        return v
+
+    def min_value(state, depth):
+        if game.terminal_test(state):
+            return game.utility(state, player)
+        if cutoff_test(state, depth):
+            return eval_fn(state)
+        v = np.inf
+        for a in game.actions(state):
+            v = min(v, max_value(game.result(state, a), depth - 1))
+        return v
+    
+    # Return true if the current depth is greater than the given depth or if the game is in a terminal state
+    def calc_cutoff_test(state, depth):
+        return d < depth or game.terminal_test(state)
+    
+    # Returns the evaluation func
+    def calc_eval_fn(state):
+        return game.evaluation_func(state, player)
+
+    # Body of minmax_decision:
+    cutoff_test = calc_cutoff_test
+    eval_fn = calc_eval_fn
+    return max(game.actions(state), key=lambda a: min_value(game.result(state, a), d))
 
 # ______________________________________________________________________________
 
