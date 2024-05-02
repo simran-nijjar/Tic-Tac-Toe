@@ -138,6 +138,59 @@ def expect_minmax(game, state):
     # Body of expect_minmax:
     return max(game.actions(state), key=lambda a: chance_node(state, a), default=None)
 
+def expect_minmax_cutoff(game, state, d = 4, cutoff_test = None, eval_fn = None):
+    player = game.to_move(state)
+
+    def max_value(state, depth):
+        if game.terminal_test(state):
+            return game.utility(state, player)
+        if cutoff_test(state, depth):
+            return eval_fn(state)
+        v = -np.inf
+        for a in game.actions(state):
+            v = max(v, chance_node(state, a))
+        return v
+
+    def min_value(state, depth):
+        if game.terminal_test(state):
+            return game.utility(state, player)
+        if cutoff_test(state, depth):
+            return eval_fn(state)
+        v = np.inf
+        for a in game.actions(state):
+            v = min(v, chance_node(state, a))
+        return v
+
+    def chance_node(state, action):
+        res_state = game.result(state, action)
+        if game.terminal_test(res_state):
+            return game.utility(res_state, player)
+        sum_chances = 0
+        num_chances = len(game.chances(res_state))
+        for chance in game.chances(res_state): 
+            chanceCalc = 0
+            if res_state.to_move != player: #If the move is the oppenents
+                chanceCalc = min_value(res_state ,d) #Calculate for minimization
+            else: #If the move is the players
+                chanceCalc = max_value(res_state, d) #Calculate for maximization
+            sum_chances += chanceCalc * (1 * chance) #Here the probability I have randomly assigned 1 for each node
+        if (num_chances == 0): #If the number of chances is zero return 0
+            return 0
+        return sum_chances / num_chances; #Else return the number of chances
+
+    # Return true if the current depth is greater than the given depth or if the game is in a terminal state
+    def calc_cutoff_test(state, depth):
+        return d < depth or game.terminal_test(state)
+    
+    # Returns the evaluation func
+    def calc_eval_fn(state):
+        return game.evaluation_func(state, player)
+
+    # Body of expect_minmax:
+    cutoff_test = calc_cutoff_test
+    eval_fn = calc_eval_fn
+    return max(game.actions(state), key=lambda a: chance_node(state, a), default=None)
+
 
 def alpha_beta_search(game, state):
     """Search game to determine best action; use alpha-beta pruning.
@@ -274,6 +327,8 @@ def minmax_player(game,state):
 
 
 def expect_minmax_player(game, state):
+    if( game.d == -1):
+        return expect_minmax(game, state)
     return expect_minmax(game, state)
 
 
