@@ -289,7 +289,7 @@ if __name__ == "__main__":
     height = gheight * 80
     geoStr = str(width) + "x" + str(height)
     root.geometry(geoStr)  
-    root.resizable(1, 1)  # To remove the maximize window option
+    root.resizable(0, 0)  # To remove the maximize window option
     result = StringVar()
     result.set("Your Turn!")
     w = Label(root, textvariable=result, fg = "brown")
