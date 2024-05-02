@@ -154,7 +154,13 @@ def alpha_beta_search(game, state):
 
     # Body of alpha_beta_search:
     best_action = None
-    print("alpha_beta_search: to be completed by students")
+    alpha = -np.inf #Initialized to negative infinity to find max value
+    beta = np.inf #Initialized to positive infinity to find min value
+    for action in game.actions(state): #Finding action in game state
+        v = min_value(game.result(state, action), alpha, beta) #Use min_value() function to check for the opponent's moves
+        if (v > alpha):
+            best_action = action
+            alpha = v
     return best_action
 
 
