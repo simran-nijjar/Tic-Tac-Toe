@@ -1,4 +1,5 @@
-"""Provides some utilities widely used by other modules"""
+# utils.py
+# Simran Nijjar
 
 import bisect
 import collections
@@ -13,10 +14,7 @@ from statistics import mean
 
 import numpy as np
 
-
-# ______________________________________________________________________________
-# Functions on Sequences and Iterables
-
+# Defines the utilities used by the other files
 
 def sequence(iterable):
     """Converts iterable to sequence, if it is not already one."""
@@ -99,9 +97,6 @@ def flatten(seqs):
     return sum(seqs, [])
 
 
-# ______________________________________________________________________________
-# argmin and argmax
-
 identity = lambda x: x
 
 
@@ -121,10 +116,7 @@ def shuffled(iterable):
     random.shuffle(items)
     return items
 
-
-# ______________________________________________________________________________
 # Statistical and mathematical functions
-
 
 def histogram(values, mode=0, bin_function=None):
     """Return a list of (value, count) pairs, summarizing the input values.
@@ -353,9 +345,7 @@ def rbf_kernel(x, y=None, gamma=None):
                             np.sum(x * x, axis=1).reshape((-1, 1)) + np.sum(y * y, axis=1).reshape((1, -1))))
 
 
-# ______________________________________________________________________________
 # Grid Functions
-
 
 orientations = EAST, NORTH, WEST, SOUTH = [(1, 0), (0, 1), (-1, 0), (0, -1)]
 turns = LEFT, RIGHT = (+1, -1)
@@ -386,8 +376,6 @@ def distance_squared(a, b):
     xB, yB = b
     return (xA - xB) ** 2 + (yA - yB) ** 2
 
-
-# ______________________________________________________________________________
 # Misc Functions
 
 class injection:
@@ -478,7 +466,6 @@ def failure_test(algorithm, tests):
     return mean(int(algorithm(x) != y) for x, y in tests)
 
 
-# ______________________________________________________________________________
 # Expressions
 
 # See https://docs.python.org/3/reference/expressions.html#operator-precedence
@@ -712,8 +699,6 @@ class hashabledict(dict):
     def __hash__(self):
         return 1
 
-
-# ______________________________________________________________________________
 # Queues: Stack, FIFOQueue, PriorityQueue
 # Stack and FIFOQueue are implemented as list and collection.deque
 # PriorityQueue is implemented here

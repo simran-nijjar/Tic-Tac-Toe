@@ -1,21 +1,19 @@
-"""Games or Adversarial Search (Chapter 5)"""
+# games.py
+# Simran Nijjar
 
 import copy
 import itertools
-import random
 from collections import namedtuple
 
 import numpy as np
 
-#from utils import vector_add
+# Defines the different algorithms used to choose the computer's moves 
+# The algorithms are MinMax, Expectimax, and AlphaBeta Search
 
 GameState = namedtuple('GameState', 'to_move, utility, board, moves')
 
 def gen_state(to_move='X', x_positions=[], o_positions=[], h=3, v=3):
-    """Given whose turn it is to move, the positions of X's on the board, the
-    positions of O's on the board, and, (optionally) number of rows, columns
-    and how many consecutive X's or O's required to win, return the corresponding
-    game state"""
+    # Given whose turn it is to move, the positions of X's and O's on the board, and number of rows, columns return the game state"""
 
     moves = set([(x, y) for x in range(1, h + 1) for y in range(1, v + 1)]) - set(x_positions) - set(o_positions)
     moves = list(moves)
@@ -26,11 +24,7 @@ def gen_state(to_move='X', x_positions=[], o_positions=[], h=3, v=3):
         board[pos] = 'O'
     return GameState(to_move=to_move, utility=0, board=board, moves=moves)
 
-
-# ______________________________________________________________________________
 # MinMax Search
-
-
 def minmax(game, state):
     """Given a state in a game, calculate the best move by searching
     forward all the way to the terminal states. [Figure 5.3]"""
@@ -95,10 +89,8 @@ def minmax_cutoff(game, state, d = 4, cutoff_test = None, eval_fn = None):
     eval_fn = calc_eval_fn
     return max(game.actions(state), key=lambda a: min_value(game.result(state, a), d))
 
-# ______________________________________________________________________________
-
-
-def expect_minmax(game, state):
+# Expectimax
+def expectimax(game, state):
     """
     [Figure 5.11]
     Return the best move for a player after dice are thrown. The game tree
@@ -135,10 +127,10 @@ def expect_minmax(game, state):
             return 0
         return sum_chances / num_chances; #Else return the number of chances
 
-    # Body of expect_minmax:
+    # Body of expectimax:
     return max(game.actions(state), key=lambda a: chance_node(state, a), default=None)
 
-def expect_minmax_cutoff(game, state, d = 4, cutoff_test = None, eval_fn = None):
+def expectimax_cutoff(game, state, d = 4, cutoff_test = None, eval_fn = None):
     player = game.to_move(state)
 
     def max_value(state, depth):
@@ -186,12 +178,12 @@ def expect_minmax_cutoff(game, state, d = 4, cutoff_test = None, eval_fn = None)
     def calc_eval_fn(state):
         return game.evaluation_func(state, player)
 
-    # Body of expect_minmax:
+    # Body of expectimax:
     cutoff_test = calc_cutoff_test
     eval_fn = calc_eval_fn
     return max(game.actions(state), key=lambda a: chance_node(state, a), default=None)
 
-
+# Alpha Beta
 def alpha_beta_search(game, state):
     """Search game to determine best action; use alpha-beta pruning.
     As in [Figure 5.7], this version searches all the way to the leaves."""
@@ -286,11 +278,7 @@ def alpha_beta_cutoff_search(game, state, d=4, cutoff_test=None, eval_fn=None):
             best_action = action
     return best_action
 
-
-# ______________________________________________________________________________
 # Players for Games
-
-
 def query_player(game, state):
     """Make a move by querying standard input."""
     print("current state:")
@@ -308,12 +296,6 @@ def query_player(game, state):
         print('no legal moves: passing turn to next player')
     return move
 
-
-def random_player(game, state):
-    """A player that chooses a legal move at random."""
-    return random.choice(game.actions(state)) if game.actions(state) else None
-
-
 def alpha_beta_player(game, state):
     if( game.d == -1):
         return alpha_beta_search(game, state)
@@ -326,25 +308,14 @@ def minmax_player(game,state):
     return minmax_cutoff(game, state)
 
 
-def expect_minmax_player(game, state):
+def expectimax_player(game, state):
     if( game.d == -1):
-        return expect_minmax(game, state)
-    return expect_minmax(game, state)
+        return expectimax(game, state)
+    return expectimax_cutoff(game, state)
 
 
-# ______________________________________________________________________________
-# 
-
-
+# Game class
 class Game:
-    """A game is similar to a problem, but it has a utility for each
-    state and a terminal test instead of a path cost and a goal
-    test. To create a game, subclass this class and implement actions,
-    result, utility, and terminal_test. You may override display and
-    successors or you can inherit their default methods. You will also
-    need to set the .initial attribute to the initial state; this can
-    be done in the constructor."""
-
     def actions(self, state):
         """Return a list of the allowable moves at this point."""
         raise NotImplementedError
@@ -384,13 +355,10 @@ class Game:
                     return self.utility(state, self.to_move(self.initial))
 
 
-
+# TicTacToe class
 class TicTacToe(Game):
-    """Play TicTacToe on an h x v board, with Max (first player) playing 'X'.
-    A state has the player to_move, a cached utility, a list of moves in
-    the form of a list of (x, y) positions, and a board, in the form of
-    a dict of {(x, y): Player} entries, where Player is 'X' or 'O'.
-    depth = -1 means max search tree depth to be used."""
+    # Player is 'X' or 'O'.
+    # depth = -1 means max search tree depth to be used."""
 
     def __init__(self, h=3, v=3, k=3, d=-1):
         self.h = h
@@ -510,14 +478,7 @@ class TicTacToe(Game):
         n -= 1  # Because we counted move itself twice
         return n >= self.k
 
-
     def chances(self, state):
         """Return a list of all possible states."""
         chances = []
         return chances
-    
-class Gomoku(TicTacToe):
-    """Also known as Five in a row."""
-
-    def __init__(self, h=15, v=16, k=5):
-        TicTacToe.__init__(self, h, v, k)

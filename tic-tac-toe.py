@@ -1,3 +1,6 @@
+# tic-tac-toe.py
+# Simran Nijjar
+
 import os.path
 from tkinter import *
 import sys
@@ -7,6 +10,8 @@ from collections import namedtuple
 #sys.path.append('../')
 #sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from games import *
+
+# Designs the board and button dimensions
 
 gBoard = None
 root = None
@@ -18,9 +23,9 @@ count = 0
 sym = ""
 result = None
 choices = None
-gheight = 4
-gwidth = 4
-gkmatch = 4
+gheight = 3
+gwidth = 3
+gkmatch = 3
 gdepth = -1 # -1 means search cutoff depth set to leaf level.
 
 
@@ -68,12 +73,6 @@ def create_frames(root):
     depthEntry.bind('<KeyRelease>', depthCallback)
     depthEntry.pack(side = LEFT)
     
-
-
-    
-
-
-
 butCount = 0
 def create_buttons(frame):
     """
@@ -90,7 +89,6 @@ def create_buttons(frame):
         butCount += 1
 
     buttons.append(buttons_in_frame)
-
 
 def on_click(button):
     """
@@ -133,10 +131,8 @@ def on_click(button):
 
     try:
         choice = choices.get()
-        if "Random" in choice:
-            a, b = random_player(gBoard, state2)
-        elif "Expectimax" in choice:
-            a, b = expect_minmax(gBoard, state2)
+        if "Expectimax" in choice:
+            a, b = expectimax(gBoard, state2)
         elif "MinMax" in choice:
             a, b = minmax_player(gBoard, state2)
         else:
@@ -159,72 +155,6 @@ def on_click(button):
             disable_game()
         else:
             result.set("Your Turn!")
-
-
-
-# Not Used anymore: Replaced by "k_in_row" function.
-def check_victory(button):
-    """
-    This function checks various winning conditions of the game.
-    """
-    # check if previous move caused a win on vertical line
-    x, y = get_coordinates(button)
-    tt = button['text']
-    verticalWin = True
-    for i in range(gkmatch):
-        if buttons[0][y]['text'] != buttons[i][y]['text']:
-            verticalWin = False
-            break
-
-    if verticalWin == True:
-        for i in range(gkmatch):
-            buttons[i][y].config(text="|" + tt + "|")
-        return True
-
-    # check if previous move caused a win on horizontal line
-    horizontalWin = True
-    for i in range(gkmatch):
-        if buttons[x][0]['text'] != buttons[x][i]['text']:
-            horizontalWin = False
-            break
-
-    if horizontalWin == True:
-        for i in range(gkmatch):
-            buttons[x][i].config(text="--" + tt + "--")
-        return True
-
-
-    # check if previous move was on the main diagonal and caused a win
-    if x == y:
-        diagonalWin = True
-        for i in range(gkmatch):
-            if buttons[0][0]['text'] != buttons[i][i]['text']:
-                diagonalWin = False
-                break
-
-        if diagonalWin == True:
-            for i in range(gkmatch):
-                buttons[i][i].config(text="\\" + tt + "\\")
-            return True
-
-
-    # check if previous move was on the secondary diagonal and caused a win
-    maxIndx = gkmatch - 1
-    if x + y == maxIndx:
-        diagonalWin = True
-        for i in range(gkmatch):
-            if buttons[0][maxIndx]['text'] != buttons[i][maxIndx-i]['text']:
-                diagonalWin = False
-                break
-
-        if diagonalWin == True:
-            for i in range(gkmatch):
-                buttons[i][maxIndx-i].config(text="/" + tt + "/")
-            return True
-
-
-    return False
-
 
 def get_coordinates(button):
     """
@@ -280,6 +210,11 @@ if __name__ == "__main__":
         gheight = int(sys.argv[1])
         gwidth =  int(sys.argv[2])
         gkmatch = int(sys.argv[3])
+        if gheight < 3 or gwidth < 3 or gkmatch < 3:
+            print("Minimum size for each dimension is 3. Setting to minimum allowable size.")
+            gheight = max(3, gheight)
+            gwidth = max(3, gwidth)
+            gkmatch = max(3, gkmatch)
     else:
         gheight = gwidth = gkmatch = 3
 
@@ -296,8 +231,8 @@ if __name__ == "__main__":
     w.pack(side=BOTTOM)
     create_frames(root)
     choices = StringVar(root)
-    choices.set("Random")
-    menu = OptionMenu(root, choices, "Random", "MinMax", "AlphaBeta", "Expectimax")
+    choices.set("MinMax")
+    menu = OptionMenu(root, choices, "MinMax", "AlphaBeta", "Expectimax")
     menu.pack(side=TOP) 
 
     root.mainloop()
